@@ -17,7 +17,7 @@ function updateFreshness() {
   const age = latest ? Math.max(0, latestOverview.age_seconds + elapsed) : null;
   const stale = age !== null && age > latestOverview.stale_seconds;
   const state = lastFailure ? 'offline' : !latest ? 'waiting' : stale ? 'stale' : 'current';
-  $('connection').className = `status-badge ${state}`;
+  $('connection').className = `status-badge badge ${state}`;
   $('connection').textContent = {offline: 'Disconnected', waiting: 'Waiting', stale: 'Stale data', current: 'Receiving data'}[state];
   $('sample-age').textContent = age === null ? 'No data yet' : age < 60 ? `${Math.floor(age)}s ago` : `${Math.floor(age / 60)}m ago`;
   const warningCount = latest ? latest.alerts.length : 0;
@@ -55,7 +55,8 @@ function renderOverview(data) {
     for (const alert of latest.alerts) {
       const card = element('div', 'alert-item');
       const copy = element('div'); copy.append(element('h3', '', alert.title), element('p', '', alert.action));
-      card.append(element('span', 'alert-symbol', '!'), copy);
+      const symbol = element('span', 'alert-symbol'); symbol.append(makeIcon('warning'));
+      card.append(symbol, copy);
       holder.append(card);
     }
   }
@@ -110,7 +111,7 @@ function renderHistory() {
   const matching = selectedReadings().slice().reverse().filter(r => `${r.id} ${fullTime(r.timestamp)} ${r.source} ${sources[r.source]} ${Object.keys(meta).map(key=>r[key]).join(' ')} ${r.alerts.map(a=>a.title).join(' ')}`.toLowerCase().includes(searchTerm));
   const visible = historyExpanded ? matching : matching.slice(0,6);
   $('history-summary').textContent = `Showing ${visible.length} of ${matching.length} sample${matching.length===1?'':'s'}`;
-  $('toggle-history').textContent = historyExpanded ? 'Show less ‹' : 'View all ›';
+  $('toggle-history').replaceChildren(document.createTextNode(historyExpanded ? 'Show less ' : 'View all '), makeIcon(historyExpanded ? 'chevron-up' : 'chevron'));
   if (!visible.length) {const row = element('tr'); const cell = element('td', 'empty-cell', searchTerm ? 'No readings match your search.' : 'No samples recorded yet.'); cell.colSpan = 8; row.append(cell); body.append(row); return;}
   for (const reading of visible) {
     const row = element('tr'), timeCell = element('td');
@@ -141,24 +142,23 @@ function renderGauge(reading) {
   svg.setAttribute('aria-label', reading ? `${good} of 4 conditions within demonstration limits, based on the latest recorded sample.` : 'Waiting for sensor conditions.');
 }
 
-const iconPaths = {
-  leaf:'M20 3C9 2 3 7 5 14c1 5 8 6 11 2 3-3 4-8 4-13ZM4 21 15 9M9 16v-5m0 5h5',
-  grid:'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z',
-  drop:'M12 3C9 7 5 11 5 15a7 7 0 0 0 14 0c0-4-4-8-7-12ZM8 15a4 4 0 0 0 4 4',
-  chart:'M3 4v17h18M6 14l5-5 4 3 6-7', bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4',
-  clock:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 7v5l3 2',
-  settings:'m9 3-1 3-3 1-2 4 2 2v3l4 3 3-1 3 1 4-3v-3l2-2-2-4-3-1-1-3ZM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
-  search:'M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM16 16l5 5',
-  download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',refresh:'M20 11a8 8 0 1 0-2 7M20 4v7h-7',
-  database:'M20 5c0 4-16 4-16 0s16-4 16 0ZM4 5v7c0 4 16 4 16 0V5M4 12v7c0 4 16 4 16 0v-7',
-  wave:'M2 7c4-6 6 6 10 0s6 6 10 0M2 13c4-6 6 6 10 0s6 6 10 0M2 19c4-6 6 6 10 0s6 6 10 0',
-  sun:'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2',
-  chevron:'m9 5 7 7-7 7',check:'m5 12 4 4L19 6',info:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 11v6m0-11v1'
+// Bootstrap Icons are served locally; labels stay in the surrounding text.
+const iconNames = {
+  leaf: 'leaf', grid: 'grid-1x2-fill', drop: 'moisture', chart: 'graph-up-arrow',
+  bell: 'bell', clock: 'clock-history', settings: 'gear', search: 'search',
+  download: 'download', refresh: 'arrow-clockwise', database: 'database',
+  wave: 'water', ph: 'eyedropper', sun: 'brightness-high', moon: 'moon-stars',
+  chevron: 'chevron-right', 'chevron-up': 'chevron-up', check: 'check2-circle',
+  info: 'info-circle', warning: 'exclamation-triangle-fill'
 };
-function makeIcon(name) {const svg=svgNode('svg',{viewBox:'0 0 24 24',class:'icon','aria-hidden':'true'}); svg.append(svgNode('path',{d:iconPaths[name]||iconPaths.leaf})); return svg;}
+function makeIcon(name) {
+  const icon = element('i', `bi bi-${iconNames[name] || iconNames.leaf} icon`);
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+}
 function updateDate() {
   const now = new Date(), hour=Number(new Intl.DateTimeFormat('en-GB',{hour:'numeric',hourCycle:'h23',timeZone:'Asia/Colombo'}).format(now));
-  $('greeting').replaceChildren(document.createTextNode(hour<12?'Good morning ':hour<18?'Good afternoon ':'Good evening '),element('span','',hour<18?'☀':'☾'));
+  $('greeting').replaceChildren(document.createTextNode(hour<12?'Good morning ':hour<18?'Good afternoon ':'Good evening '),makeIcon(hour<18?'sun':'moon'));
   $('today-weekday').textContent = now.toLocaleDateString('en-GB',{weekday:'long',timeZone:'Asia/Colombo'});
   $('today-date').textContent = now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Colombo'});
 }

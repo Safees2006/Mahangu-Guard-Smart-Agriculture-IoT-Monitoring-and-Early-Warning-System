@@ -30,7 +30,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-The dashboard uses locally served CSS, JavaScript and SVG charts. No Node build step is required to run it.
+The dashboard uses locally served Bootstrap 5 styles, Bootstrap Icons, the Manrope font, JavaScript and SVG charts. No Node build step or runtime CDN connection is required. See [UI dependency versions and licenses](static/vendor/README.md).
 
 ## Run Wokwi and the MQTT dashboard
 

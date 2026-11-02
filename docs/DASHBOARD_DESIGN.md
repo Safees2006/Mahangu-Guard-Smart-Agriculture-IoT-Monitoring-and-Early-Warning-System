@@ -2,7 +2,7 @@
 
 Project: **Mahangu Guard – Smart Agriculture IoT Monitoring and Early Warning System**.
 
-The dashboard uses HTML, CSS, JavaScript and an original SVG field illustration. Its visual assets are served locally from `static/`.
+The dashboard uses Bootstrap 5.3.8 for controls, navigation and accessibility helpers, Bootstrap Icons 1.13.1 for navigation/sensor/action icons, and the Manrope variable font for headings, labels and readings. HTML, CSS, JavaScript, icons, fonts and the original SVG field illustration are served locally from `static/`; see `static/vendor/README.md` for upstream sources and licenses.
 
 The updated layout uses a white sidebar with green navigation, a light grey canvas, a sensor snapshot card, a segmented semicircular condition gauge, compact sensor and history cards, a green trend chart, an illustrated field panel and bottom navigation on mobile. The full project name remains in the page and browser title.
 
