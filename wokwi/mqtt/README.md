@@ -56,4 +56,4 @@ Python also supports `MQTT_TRANSPORT=websockets` (`/mqtt` path) for brokers that
 
 References: [Wokwi networking](https://docs.wokwi.com/guides/esp32-wifi), [HiveMQ public broker](https://www.hivemq.com/mqtt/public-mqtt-broker/), [Paho Python client](https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html), [PubSubClient API](https://pubsubclient.knolleary.net/api.html).
 
-Verification boundary: real public-broker Python-to-dashboard delivery has been tested. A later user-supplied Wokwi Serial run confirmed successful startup, WiFi, NTP and MQTT transmission; three exact sample timestamps and values matched SQLite IDs 22–24. See `evidence/04_development/wokwi_479554649720488961/` for that evidence and `evidence/05_testing/mqtt/` for the earlier Python test. Physical calibration, broader simulator scenarios and long-duration reliability remain pending.
+The public-broker Python path and a short Wokwi publication run have been checked. For your own run, compare the Serial timestamp and readings with an accepted record in the subscriber and dashboard. Physical calibration, broader simulator scenarios and long-duration reliability remain unverified.

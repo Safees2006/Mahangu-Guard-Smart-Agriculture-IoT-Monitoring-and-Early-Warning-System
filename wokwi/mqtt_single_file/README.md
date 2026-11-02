@@ -11,4 +11,4 @@ The current version defers NTP startup until WiFi has an IP address and includes
 
 This file uses the topic generated for this workspace. If the laptop topic changes, update the `MQTT_TOPIC` definition in the sketch to match `instance/mqtt-demo.json`. The public anonymous broker is for synthetic readings only. No API token is included.
 
-Verification boundary: the user-provided Serial run and matching backend rows establish startup and three-sample delivery for this version. See `evidence/04_development/wokwi_479554649720488961/`. Physical calibration, broader simulator scenarios and long-duration resilience remain pending. If a later build fails, copy the full build error text, including the rightmost text after `undefined reference`, so the missing symbol can be identified.
+For your own run, match each Serial timestamp and reading to an accepted record in the subscriber and dashboard. Physical calibration, broader simulator scenarios and long-duration resilience remain unverified. If a later build fails, copy the full build error text, including the rightmost text after `undefined reference`, so the missing symbol can be identified.

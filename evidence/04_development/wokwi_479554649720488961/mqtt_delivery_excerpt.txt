@@ -1,5 +1,0 @@
-Excerpt from the captured MQTT subscriber output; the original tool capture was truncated.
-2026-11-02 10:36:53,487 MQTT -> API stored id=1 timestamp=2026-11-02T05:06:53.293031+00:00 source=mqtt_demo
-2026-11-02 11:11:14,167 MQTT -> API stored id=19 timestamp=2026-11-02T05:39:52+00:00 source=wokwi_simulation
-2026-11-02 11:11:19,321 MQTT -> API stored id=20 timestamp=2026-11-02T05:39:57+00:00 source=wokwi_simulation
-2026-11-02 11:11:40,502 MQTT -> API stored id=21 timestamp=2026-11-02T05:40:02+00:00 source=wokwi_simulation

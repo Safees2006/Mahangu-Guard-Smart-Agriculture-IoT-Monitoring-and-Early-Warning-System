@@ -10,3 +10,13 @@ instance/
 *.log
 /mahangu_guard_mqtt_*.zip
 /mahangu_guard_mqtt_*/
+
+# Local assignment material and generated captures are not project source.
+/reports/
+/evidence/
+/docs/PROJECT_PLAN.md
+/docs/REQUIREMENTS.md
+*.pdf
+*.docx
+*.doc
+*.zip

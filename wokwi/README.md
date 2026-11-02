@@ -1,4 +1,4 @@
-# Wokwi simulation starter — verification pending
+# Wokwi direct-HTTP firmware
 
 **This is the original direct-HTTP version.** For MQTT without a private Wokwi gateway, use [mqtt/README.md](mqtt/README.md) and the files in `wokwi/mqtt/` instead.
 
@@ -12,4 +12,4 @@ Pin map: moisture 34; pH 35; alkalinity 32; relative light 33; DHT22 15; red LED
 
 The supplied firmware allows plain HTTP only through the local private gateway. HTTPS is explicitly blocked until a trusted root CA is configured in the sketch; do not disable certificate verification. An authenticated HTTPS tunnel is a future alternative requiring proper TLS setup, exposure controls and separate verification. Do not expose the Flask development server publicly as a finished deployment.
 
-Capture P08 for circuit and serial evidence, then P09/E02 for one matching end-to-end sample. The local Python feeder exercises the backend path independently and is not evidence of Wokwi transmission.
+To check delivery, compare the returned record ID, device ID, timestamp and values with the dashboard and `/api/overview`. The local Python feeder exercises the backend independently of Wokwi.
