@@ -41,7 +41,7 @@ The dashboard uses locally served Bootstrap 5 styles, Bootstrap Icons, the Manro
 
 Open **http://127.0.0.1:5050** and keep the terminal running. On Windows, `powershell -ExecutionPolicy Bypass -File .\start-mqtt.ps1` performs setup and startup.
 
-Use the [MQTT firmware instructions](wokwi/mqtt/README.md) or [Tamil/Tanglish guide](docs/MQTT_SETUP_TAMIL.md). Copy `sketch.ino`, `diagram.json`, `libraries.txt` and the locally generated `config.h` from `wokwi/mqtt/` into an ESP32 Arduino project in Wokwi. Start the simulation and confirm both Serial publication and an accepted sample on the dashboard.
+Follow the [English MQTT setup guide](docs/MQTT_SETUP.md) or the [MQTT firmware instructions](wokwi/mqtt/README.md). Copy `sketch.ino`, `diagram.json`, `libraries.txt` and the locally generated `config.h` from `wokwi/mqtt/` into an ESP32 Arduino project in Wokwi. Start the simulation and confirm both Serial publication and an accepted sample on the dashboard.
 
 If you prefer no `config.h` tab, use the [single-file firmware](wokwi/mqtt_single_file/README.md). Its `MQTT_TOPIC` must match your laptop's `instance/mqtt-demo.json`. A fresh clone generates its own topic; update a shared Wokwi project to match before expecting readings.
 
