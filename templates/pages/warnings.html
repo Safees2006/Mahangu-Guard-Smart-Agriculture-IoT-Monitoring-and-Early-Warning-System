@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-warnings" aria-label="Latest sample warnings">
+  {% include 'partials/alerts.html' %}
+</section>
+<section class="panel information-card page-note"><h2>Demonstration warning limits</h2><p>Warnings below apply to the latest stored sample. Check its age and verify the measurement before taking action.</p><div class="table-scroll"><table class="rules-table"><thead><tr><th scope="col">Condition</th><th scope="col">Warning rule</th><th scope="col">Suggested next step</th></tr></thead><tbody>
+  <tr><td>Dry soil</td><td>Moisture &lt; {{ demo_rules.dry_below }}%</td><td>Inspect the plot and check the reading.</td></tr>
+  <tr><td>Waterlogging risk</td><td>Moisture &gt; {{ demo_rules.wet_above }}%</td><td>Check drainage and verify soil conditions.</td></tr>
+  <tr><td>High temperature</td><td>Temperature &gt; {{ demo_rules.hot_above }}°C</td><td>Confirm temperature and field conditions.</td></tr>
+  <tr><td>pH outside demo range</td><td>pH &lt; {{ demo_rules.ph_below }} or &gt; {{ demo_rules.ph_above }}</td><td>Verify with a calibrated probe.</td></tr>
+  <tr><td>High demo alkalinity</td><td>Alkalinity &gt; {{ demo_rules.alkalinity_above }} mg/L</td><td>Verify the measurement and consult an agronomist.</td></tr>
+</tbody></table></div><p>Light has no configured warning rule. These limits have not been validated for a particular farm or soil.</p></section>
+{% endblock %}

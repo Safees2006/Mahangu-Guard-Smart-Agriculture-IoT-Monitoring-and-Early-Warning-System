@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ project_name }}. {{ page_info.description }}">
+  <title>{{ page_info.title }} | {{ project_name }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='mark.svg') }}" type="image/svg+xml">
+  <link rel="preload" href="{{ url_for('static', filename='fonts/manrope/Manrope-Variable.ttf') }}" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='pages-1') }}">
+  <script src="{{ url_for('static', filename='app.js', v='pages-1') }}" defer></script>
+</head>
+<body data-page="{{ page }}" data-transport="{{ 'mqtt' if mqtt_mode else 'http' }}" data-history-url="{{ url_for('reading_history') }}">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('index') }}" title="{{ project_name }}"><span class="brand-mark" data-icon="leaf"></span><span>Mahangu<span class="brand-green">Guard</span></span></a>
+    <span class="nav-caption">FARM WORKSPACE</span>
+    <nav class="nav nav-pills flex-column" aria-label="Main navigation">
+      {% for key, item in navigation.items() %}
+      <a class="nav-link{% if page == key %} active{% endif %}" href="{{ url_for(item.endpoint) }}"{% if page == key %} aria-current="page"{% endif %}>
+        <span data-icon="{{ item.icon }}"></span>{{ item.title }}{% if key == 'warnings' %}<span id="nav-alert-count" class="badge nav-count">0</span>{% endif %}
+      </a>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-note"><span data-icon="leaf"></span><strong>Grow with insight.</strong><p>A clearer view of your field,<br>one reading at a time.</p><a href="{{ url_for('system_information') }}">About this prototype <span>↗</span></a></div><div class="sidebar-foot"><i class="live-dot"></i>Unit 45 · IoT project</div></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="mobile-brand" href="{{ url_for('index') }}"><span class="brand-mark" data-icon="leaf"></span>Mahangu<span>Guard</span></a>
+      <form class="search-box" role="search" action="{{ url_for('reading_history') }}" method="get">
+        <span data-icon="search"></span><label class="visually-hidden" for="header-search">Search reading history</label><input id="header-search" name="q" type="search" class="form-control form-control-sm" placeholder="Search readings or warnings…" value="{{ search_query }}"><kbd>/</kbd>
+      </form>
+      <div class="topbar-right"><a class="notification-link icon-button" href="{{ url_for('warnings') }}" aria-label="View field warnings"><span data-icon="bell"></span><i id="notification-dot" hidden></i></a><span class="topbar-divider"></span><div class="workspace-account"><span class="avatar">MG</span><span><strong>Farm workspace</strong><small>Kavango East, Namibia</small></span><span class="account-leaf" data-icon="leaf"></span></div></div>
+    </header>
+    <main>
+      <div class="page-heading">
+        <div>
+          {% if page == 'dashboard' %}<h1 id="greeting">Good morning <span data-icon="sun"></span></h1><p class="project-name">{{ project_name }}</p>
+          {% else %}<h1 id="page-title">{{ page_info.title }}</h1><p class="page-description">{{ page_info.description }}</p>{% endif %}
+        </div>
+        <div class="page-actions">
+          {% if page in ['dashboard', 'trends', 'history'] %}
+          <label class="period-control"><span data-icon="clock"></span><span class="visually-hidden">Recent sample window</span><select class="form-select form-select-sm" id="history-window"><option value="60">Last 60 samples</option><option value="30">Last 30 samples</option><option value="10">Last 10 samples</option></select></label>
+          {% endif %}
+          {% if page != 'system' %}<a class="btn btn-success button button-primary" href="{{ url_for('export') }}">Export data <span data-icon="download"></span></a>{% endif %}
+        </div>
+      </div>
+      {% if page != 'dashboard' %}
+      <div class="panel page-status" aria-label="Latest sample status">
+        <span id="connection" class="status-badge badge">Waiting</span>
+        <span>Last update <strong id="sample-age">No data</strong></span>
+        <span>Recorded samples <strong id="total-samples">0</strong></span>
+        <span>Source <strong id="source-summary">Awaiting data</strong></span>
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+      <div class="monitoring-strip"><div class="monitoring-strip-title"><i class="signal-dot"></i><strong id="status-title">Waiting for readings</strong></div><p id="status-detail">Start a device or demo feeder to see conditions.</p><span id="source-note">No source connected · no field measurements verified</span></div>
+      <footer><span><span data-icon="leaf"></span>Mahangu Guard <i>/</i> Unit 45 · Internet of Things</span><span>Observe carefully. Grow thoughtfully.</span></footer>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    {% for key, item in navigation.items() %}
+    <a href="{{ url_for(item.endpoint) }}"{% if page == key %} class="active" aria-current="page"{% endif %}><span data-icon="{{ item.icon }}"></span><span>{{ item.mobile_title }}</span></a>
+    {% endfor %}
+  </nav>
+</body>
+</html>

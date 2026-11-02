@@ -2,7 +2,9 @@
 import csv
 from datetime import timedelta
 import io
+from html import escape
 from pathlib import Path
+import re
 import tempfile
 import unittest
 
@@ -25,6 +27,43 @@ class MonitoringTests(unittest.TestCase):
 
     def post(self, data):
         return self.client.post("/api/readings", json=data, headers=self.headers)
+
+    def test_workspace_pages_have_distinct_content_and_active_navigation(self):
+        pages = [
+            ("/", "dashboard", "Dashboard", 'id="overview"'),
+            ("/sensors", "sensors", "Soil & sensors", 'id="sensor-catalog"'),
+            ("/trends", "trends", "Sensor trends", 'class="page-chart"'),
+            ("/warnings", "warnings", "Early warnings", 'class="page-warnings"'),
+            ("/history", "history", "Reading history", 'class="page-history"'),
+            ("/system", "system", "System information", 'class="system-facts workspace-facts"'),
+        ]
+        for path, page, title, content in pages:
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                html = response.get_data(as_text=True)
+                self.assertIn(f'data-page="{page}"', html)
+                self.assertIn(f'<title>{escape(title)} | ', html)
+                self.assertIn(content, html)
+                active = re.findall(r'<a[^>]+href="([^"]+)"[^>]*aria-current="page"', html)
+                self.assertEqual(active, [path, path])
+                ids = re.findall(r'\bid="([^"]+)"', html)
+                self.assertEqual(len(ids), len(set(ids)), "Duplicate IDs break live updates.")
+                if page != "dashboard":
+                    self.assertNotIn('class="overview-grid"', html)
+                    self.assertIn(f'<h1 id="page-title">{escape(title)}</h1>', html)
+                if page != "system":
+                    self.assertNotIn('class="system-facts workspace-facts"', html)
+        self.assertEqual(self.client.get("/unknown-workspace-page").status_code, 404)
+
+    def test_history_search_is_preserved_and_html_escaped(self):
+        query = '\"><script>alert(1)</script>'
+        response = self.client.get("/history", query_string={"q": query})
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', html)
+        self.assertNotIn('<script>alert(1)</script>', html)
+        self.assertIn('name="q"', html)
 
     def test_T01_valid_sample_matches_ingestion_history_and_overview(self):
         payload = sample()

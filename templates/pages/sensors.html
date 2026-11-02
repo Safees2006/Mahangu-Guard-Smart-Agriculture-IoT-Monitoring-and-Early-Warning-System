@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<section id="sensor-catalog" aria-label="Current sensor values">
+  {% include 'partials/metrics.html' %}
+</section>
+<div class="page-detail-grid">
+  <section class="panel information-card"><h2>Device and latest sample</h2><dl class="system-facts"><div><dt>Registered device</dt><dd>{{ device_id }}</dd></div><div><dt>Sample time</dt><dd id="updated-time">Awaiting data</dd></div><div><dt>Input mode</dt><dd>Reported source is shown above</dd></div><div><dt>Units</dt><dd>Moisture and light: % · temperature: °C · pH · alkalinity: mg/L as CaCO₃</dd></div></dl></section>
+  <section class="panel information-card"><h2>Readings with context</h2><p>Moisture, pH and alkalinity are separate simulated inputs. Light is relative intensity, not lux. Alkalinity cannot be inferred from pH and does not establish soil salinity.</p><p>In Wokwi, adjust the analogue controls and DHT22 to try different values. Physical accuracy requires calibrated sensors.</p><a class="page-text-link" href="{{ url_for('warnings') }}">Review demonstration warning limits <span data-icon="chevron"></span></a></section>
+</div>
+{% endblock %}

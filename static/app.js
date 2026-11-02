@@ -3,12 +3,16 @@ const $ = (id) => document.getElementById(id);
 const meta = {moisture: ['Soil moisture', '%', 0, 100], temperature: ['Temperature', '°C', -10, 60], ph: ['Soil pH', 'pH', 0, 14], light: ['Light level', '%', 0, 100], alkalinity: ['Alkalinity', 'mg/L as CaCO₃', 0, 400]};
 const sources = {local_demo: 'Local demo · synthetic', mqtt_demo: 'MQTT demo · synthetic', wokwi_simulation: 'Wokwi · simulated', physical_device: 'Device reported · unverified'};
 let readings = [], latestOverview = null, lastSuccessAt = null, lastFailure = false, loading = false;
-let historyExpanded = false, searchTerm = '';
+const currentPage = document.body.dataset.page || 'dashboard';
+let historyExpanded = currentPage === 'history';
+let searchTerm = (new URLSearchParams(location.search).get('q') || '').trim().toLowerCase();
 const mqttMode = document.body.dataset.transport === 'mqtt';
 const numeric = (value) => Number(value).toLocaleString(undefined, {maximumFractionDigits: 1});
 const localTime = (value) => new Date(value).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
 const fullTime = (value) => new Date(value).toLocaleString([], {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
 function element(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
+function setText(id, text) { const node = $(id); if (node) node.textContent = text; }
+function on(id, event, handler) { $(id)?.addEventListener(event, handler); }
 
 function updateFreshness() {
   if (!latestOverview) return;
@@ -18,46 +22,49 @@ function updateFreshness() {
   const stale = age !== null && age > latestOverview.stale_seconds;
   const state = lastFailure ? 'offline' : !latest ? 'waiting' : stale ? 'stale' : 'current';
   $('connection').className = `status-badge badge ${state}`;
-  $('connection').textContent = {offline: 'Disconnected', waiting: 'Waiting', stale: 'Stale data', current: 'Receiving data'}[state];
-  $('sample-age').textContent = age === null ? 'No data yet' : age < 60 ? `${Math.floor(age)}s ago` : `${Math.floor(age / 60)}m ago`;
+  setText('connection', {offline: 'Disconnected', waiting: 'Waiting', stale: 'Stale data', current: 'Receiving data'}[state]);
+  setText('sample-age', age === null ? 'No data yet' : age < 60 ? `${Math.floor(age)}s ago` : `${Math.floor(age / 60)}m ago`);
   const warningCount = latest ? latest.alerts.length : 0;
-  $('status-title').textContent = lastFailure ? 'Backend unreachable' : !latest ? 'Waiting for readings' : stale ? 'Updates have stopped' : warningCount ? 'Conditions need attention' : 'Within demo thresholds';
-  $('status-detail').textContent = lastFailure ? 'Check the local server. Last known readings remain visible.' : !latest ? (mqttMode ? 'Waiting for Wokwi or a test publisher through the MQTT subscriber.' : 'Start the local demo feeder to see conditions.') : stale ? 'This sample is over 20 seconds old. Check the feeder or device connection.' : warningCount ? `${warningCount} warning${warningCount === 1 ? '' : 's'} in the latest sample. Verify field conditions.` : 'Readings are current. No demonstration warnings in this sample.';
-  $('freshness-caption').textContent = {offline: 'Backend connection lost', waiting: 'Waiting for your device', stale: 'Sample is over 20 seconds old', current: 'Updates are arriving'}[state];
+  setText('status-title', lastFailure ? 'Backend unreachable' : !latest ? 'Waiting for readings' : stale ? 'Updates have stopped' : warningCount ? 'Conditions need attention' : 'Within demo thresholds');
+  setText('status-detail', lastFailure ? 'Check the local server. Last known readings remain visible.' : !latest ? (mqttMode ? 'Waiting for Wokwi or a test publisher through the MQTT subscriber.' : 'Start the local demo feeder to see conditions.') : stale ? 'This sample is over 20 seconds old. Check the feeder or device connection.' : warningCount ? `${warningCount} warning${warningCount === 1 ? '' : 's'} in the latest sample. Verify field conditions.` : 'Readings are current. No demonstration warnings in this sample.');
+  setText('freshness-caption', {offline: 'Backend connection lost', waiting: 'Waiting for your device', stale: 'Sample is over 20 seconds old', current: 'Updates are arriving'}[state]);
 }
 
 function renderOverview(data) {
   latestOverview = data;
   lastSuccessAt = Date.now();
   const latest = data.latest;
-  for (const key of Object.keys(meta)) $(key + '-value').textContent = latest ? numeric(latest[key]) : '—';
-  $('moisture-meter').style.width = `${latest ? latest.moisture : 0}%`;
-  $('updated-time').textContent = latest ? localTime(latest.timestamp) : '—';
-  $('updated-time').title = latest ? fullTime(latest.timestamp) : '';
-  $('source-note').textContent = latest ? `${sources[latest.source]} · field accuracy not verified` : 'No source connected · no field measurements verified';
-  $('sample-count').textContent = `${data.count.toLocaleString()} samples stored`;
-  $('total-samples').textContent = data.count.toLocaleString();
-  $('source-summary').textContent = latest ? ({local_demo:'Synthetic demo', mqtt_demo:'MQTT demo', wokwi_simulation:'Wokwi simulation', physical_device:'Device · unverified'}[latest.source]) : 'Awaiting data';
-  $('field-source').textContent = latest ? ({local_demo:'Local demo', mqtt_demo:'MQTT demo', wokwi_simulation:'Wokwi simulation', physical_device:'Unverified device'}[latest.source]) : 'Not connected';
-  $('field-condition').textContent = !latest ? 'Waiting for data' : latest.alerts.length ? 'Needs attention' : 'Within demo limits';
-  $('field-condition').classList.toggle('needs-attention', !!latest?.alerts.length);
-  $('nav-alert-count').textContent = latest ? latest.alerts.length : 0;
+  for (const key of Object.keys(meta)) setText(key + '-value', latest ? numeric(latest[key]) : '—');
+  if ($('moisture-meter')) $('moisture-meter').style.width = `${latest ? latest.moisture : 0}%`;
+  setText('updated-time', latest ? localTime(latest.timestamp) : '—');
+  if ($('updated-time')) $('updated-time').title = latest ? fullTime(latest.timestamp) : '';
+  setText('source-note', latest ? `${sources[latest.source]} · field accuracy not verified` : 'No source connected · no field measurements verified');
+  setText('sample-count', `${data.count.toLocaleString()} samples stored`);
+  setText('total-samples', data.count.toLocaleString());
+  setText('source-summary', latest ? ({local_demo:'Synthetic demo', mqtt_demo:'MQTT demo', wokwi_simulation:'Wokwi simulation', physical_device:'Device · unverified'}[latest.source]) : 'Awaiting data');
+  setText('field-source', latest ? ({local_demo:'Local demo', mqtt_demo:'MQTT demo', wokwi_simulation:'Wokwi simulation', physical_device:'Unverified device'}[latest.source]) : 'Not connected');
+  setText('field-condition', !latest ? 'Waiting for data' : latest.alerts.length ? 'Needs attention' : 'Within demo limits');
+  $('field-condition')?.classList.toggle('needs-attention', !!latest?.alerts.length);
+  setText('nav-alert-count', latest ? latest.alerts.length : 0);
   $('notification-dot').hidden = !latest?.alerts.length;
   renderGauge(latest);
-  $('alert-count').textContent = latest ? latest.alerts.length : 0;
-  const holder = $('alerts'); holder.replaceChildren();
-  if (!latest || !latest.alerts.length) {
-    const card = element('div', 'empty-alert');
-    const icon = element('span', 'empty-check'); icon.append(makeIcon(latest ? 'check' : 'leaf'));
-    card.append(icon, element('h3', '', latest ? 'No demo warnings' : 'Waiting for a sample'), element('p', '', latest ? 'All values are within demonstration limits. Continue to verify conditions in the field.' : 'Warnings will appear when a demo threshold is crossed.'));
-    holder.append(card);
-  } else {
-    for (const alert of latest.alerts) {
-      const card = element('div', 'alert-item');
-      const copy = element('div'); copy.append(element('h3', '', alert.title), element('p', '', alert.action));
-      const symbol = element('span', 'alert-symbol'); symbol.append(makeIcon('warning'));
-      card.append(symbol, copy);
+  setText('alert-count', latest ? latest.alerts.length : 0);
+  const holder = $('alerts');
+  if (holder) {
+    holder.replaceChildren();
+    if (!latest || !latest.alerts.length) {
+      const card = element('div', 'empty-alert');
+      const icon = element('span', 'empty-check'); icon.append(makeIcon(latest ? 'check' : 'leaf'));
+      card.append(icon, element('h3', '', latest ? 'No demo warnings' : 'Waiting for a sample'), element('p', '', latest ? 'All values are within demonstration limits. Continue to verify conditions in the field.' : 'Warnings will appear when a demo threshold is crossed.'));
       holder.append(card);
+    } else {
+      for (const alert of latest.alerts) {
+        const card = element('div', 'alert-item');
+        const copy = element('div'); copy.append(element('h3', '', alert.title), element('p', '', alert.action));
+        const symbol = element('span', 'alert-symbol'); symbol.append(makeIcon('warning'));
+        card.append(symbol, copy);
+        holder.append(card);
+      }
     }
   }
   updateFreshness();
@@ -70,6 +77,7 @@ function svgNode(tag, attrs, text) {
   return node;
 }
 function renderChart() {
+  if (!$('trend-chart')) return;
   const series = selectedReadings();
   const key = $('chart-metric').value, [label, unit, minimum, standardMax] = meta[key];
   const svg = $('trend-chart'); svg.replaceChildren();
@@ -80,10 +88,10 @@ function renderChart() {
   const left = 40, right = drawingWidth - 15, top = 28, bottom = 190;
   const defs = svgNode('defs', {}), gradient = svgNode('linearGradient', {id:'chart-fill',x1:0,y1:0,x2:0,y2:1});
   gradient.append(svgNode('stop', {offset:'0%','stop-color':'#9ce5b8','stop-opacity':'.65'}), svgNode('stop', {offset:'100%','stop-color':'#f2fcf5','stop-opacity':'.1'})); defs.append(gradient); svg.append(defs);
-  $('chart-legend').textContent = `${label} (${unit})`;
+  setText('chart-legend', `${label} (${unit})`);
   $('chart-empty').hidden = series.length > 0;
-  $('trend-subtitle').textContent = `${series.length} recent sample${series.length === 1 ? '' : 's'} · sample time`;
-  $('sample-count').textContent = `${series.length} displayed · ${(latestOverview?.count || 0).toLocaleString()} stored`;
+  setText('trend-subtitle', `${series.length} recent sample${series.length === 1 ? '' : 's'} · sample time`);
+  setText('sample-count', `${series.length} displayed · ${(latestOverview?.count || 0).toLocaleString()} stored`);
   svg.setAttribute('aria-label', `${label}: ${series.length} recent samples. Exact values appear in reading history and CSV export.`);
   for (let i = 0; i <= 4; i++) {
     const y = top + i * (bottom - top) / 4;
@@ -107,10 +115,12 @@ function renderChart() {
 }
 
 function renderHistory() {
-  const body = $('history-body'); body.replaceChildren();
+  const body = $('history-body');
+  if (!body) return;
+  body.replaceChildren();
   const matching = selectedReadings().slice().reverse().filter(r => `${r.id} ${fullTime(r.timestamp)} ${r.source} ${sources[r.source]} ${Object.keys(meta).map(key=>r[key]).join(' ')} ${r.alerts.map(a=>a.title).join(' ')}`.toLowerCase().includes(searchTerm));
   const visible = historyExpanded ? matching : matching.slice(0,6);
-  $('history-summary').textContent = `Showing ${visible.length} of ${matching.length} sample${matching.length===1?'':'s'}`;
+  setText('history-summary', `Showing ${visible.length} of ${matching.length} sample${matching.length===1?'':'s'}`);
   $('toggle-history').replaceChildren(document.createTextNode(historyExpanded ? 'Show less ' : 'View all '), makeIcon(historyExpanded ? 'chevron-up' : 'chevron'));
   if (!visible.length) {const row = element('tr'); const cell = element('td', 'empty-cell', searchTerm ? 'No readings match your search.' : 'No samples recorded yet.'); cell.colSpan = 8; row.append(cell); body.append(row); return;}
   for (const reading of visible) {
@@ -124,9 +134,11 @@ function renderHistory() {
   }
 }
 
-function selectedReadings() { return readings.slice(-Number($('history-window').value)); }
+function selectedReadings() { return readings.slice(-Number($('history-window')?.value || 60)); }
 function renderGauge(reading) {
-  const svg = $('condition-gauge'); svg.replaceChildren();
+  const svg = $('condition-gauge');
+  if (!svg) return;
+  svg.replaceChildren();
   const warnings = new Set(reading?.alerts.map(a=>a.code) || []);
   const checks = [!warnings.has('dry')&&!warnings.has('wet'), !warnings.has('heat'), !warnings.has('ph'), !warnings.has('alkalinity')];
   const good = reading ? checks.filter(Boolean).length : 0;
@@ -149,7 +161,8 @@ const iconNames = {
   download: 'download', refresh: 'arrow-clockwise', database: 'database',
   wave: 'water', ph: 'eyedropper', sun: 'brightness-high', moon: 'moon-stars',
   chevron: 'chevron-right', 'chevron-up': 'chevron-up', check: 'check2-circle',
-  info: 'info-circle', warning: 'exclamation-triangle-fill'
+  info: 'info-circle', warning: 'exclamation-triangle-fill',
+  temperature: 'thermometer-half', external: 'box-arrow-up-right'
 };
 function makeIcon(name) {
   const icon = element('i', `bi bi-${iconNames[name] || iconNames.leaf} icon`);
@@ -158,9 +171,9 @@ function makeIcon(name) {
 }
 function updateDate() {
   const now = new Date(), hour=Number(new Intl.DateTimeFormat('en-GB',{hour:'numeric',hourCycle:'h23',timeZone:'Asia/Colombo'}).format(now));
-  $('greeting').replaceChildren(document.createTextNode(hour<12?'Good morning ':hour<18?'Good afternoon ':'Good evening '),makeIcon(hour<18?'sun':'moon'));
-  $('today-weekday').textContent = now.toLocaleDateString('en-GB',{weekday:'long',timeZone:'Asia/Colombo'});
-  $('today-date').textContent = now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Colombo'});
+  if ($('greeting')) $('greeting').replaceChildren(document.createTextNode(hour<12?'Good morning ':hour<18?'Good afternoon ':'Good evening '),makeIcon(hour<18?'sun':'moon'));
+  setText('today-weekday', now.toLocaleDateString('en-GB',{weekday:'long',timeZone:'Asia/Colombo'}));
+  setText('today-date', now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Colombo'}));
 }
 
 async function getJSON(path) {
@@ -170,7 +183,7 @@ async function getJSON(path) {
 }
 async function refresh() {
   if (loading) return;
-  loading = true; $('refresh').disabled = true;
+  loading = true; if ($('refresh')) $('refresh').disabled = true;
   try {
     const [overview, history] = await Promise.all([getJSON('/api/overview'), getJSON('/api/readings?limit=60')]);
     lastFailure = false; readings = history.readings;
@@ -179,18 +192,31 @@ async function refresh() {
     lastFailure = true;
     if (!latestOverview) latestOverview = {latest: null, stale_seconds: 20};
     updateFreshness();
-  } finally {loading = false; $('refresh').disabled = false;}
+  } finally {loading = false; if ($('refresh')) $('refresh').disabled = false;}
 }
-$('chart-metric').addEventListener('change', renderChart);
-$('refresh').addEventListener('click', refresh);
-$('history-window').addEventListener('change',()=>{renderChart();renderHistory();});
-$('toggle-history').addEventListener('click',()=>{historyExpanded=!historyExpanded;renderHistory();});
-function setSearch(value) {searchTerm=value.trim().toLowerCase();$('header-search').value=value;$('history-filter').value=value;renderHistory();}
-for(const id of ['header-search','history-filter']) $(id).addEventListener('input',e=>setSearch(e.target.value));
-$('header-search').addEventListener('keydown',e=>{if(e.key==='Enter'){$('history').scrollIntoView({block:'start',behavior:'smooth'});}});
+on('chart-metric', 'change', renderChart);
+on('refresh', 'click', refresh);
+on('history-window', 'change', () => { renderChart(); renderHistory(); });
+on('toggle-history', 'click', () => { historyExpanded = !historyExpanded; renderHistory(); });
+function setSearch(value) {
+  searchTerm = value.trim().toLowerCase();
+  for (const id of ['header-search', 'history-filter']) if ($(id)) $(id).value = value;
+  renderHistory();
+}
+if ($('history-body')) {
+  for (const id of ['header-search', 'history-filter']) on(id, 'input', event => setSearch(event.target.value));
+}
 let chartResizeFrame;
-window.addEventListener('resize',()=>{cancelAnimationFrame(chartResizeFrame);chartResizeFrame=requestAnimationFrame(renderChart);});
-document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){e.preventDefault();const input=$('header-search').offsetParent?$('header-search'):$('history-filter');input.focus();input.scrollIntoView({block:'center',behavior:'smooth'});}});
-document.querySelectorAll('[data-icon]').forEach(node=>node.append(makeIcon(node.dataset.icon)));
-document.querySelectorAll('.nav-link,.mobile-nav a').forEach(link=>link.addEventListener('click',()=>{document.querySelectorAll('.nav-link,.mobile-nav a').forEach(item=>item.classList.toggle('active',item.hash===link.hash));if(link.hash==='#system')$('system').open=true;}));
-updateDate();renderGauge(null);renderChart(); refresh(); setInterval(refresh, 4000); setInterval(updateFreshness, 1000);setInterval(updateDate,60000);
+window.addEventListener('resize', () => { cancelAnimationFrame(chartResizeFrame); chartResizeFrame = requestAnimationFrame(renderChart); });
+document.addEventListener('keydown', event => {
+  if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    event.preventDefault();
+    const input = $('header-search')?.offsetParent ? $('header-search') : $('history-filter');
+    if (input) { input.focus(); input.scrollIntoView({block: 'center', behavior: 'smooth'}); }
+    else location.assign(document.body.dataset.historyUrl);
+  }
+});
+document.querySelectorAll('[data-icon]').forEach(node => node.append(makeIcon(node.dataset.icon)));
+// Page links use normal browser navigation; Flask renders the active item.
+updateDate(); renderGauge(null); renderChart(); refresh();
+setInterval(refresh, 4000); setInterval(updateFreshness, 1000); setInterval(updateDate, 60000);

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-chart" aria-label="Historical sensor trends">
+  {% include 'partials/trends.html' %}
+</section>
+<section class="panel information-card page-note"><h2>Explore the recorded trend</h2><p>Choose a measurement in the chart and select the most recent 10, 30 or 60 samples above. Points use each sample's timestamp; gaps can reflect delayed or stopped updates. These readings do not provide a weather or crop-yield forecast.</p><a class="page-text-link" href="{{ url_for('reading_history') }}">Inspect individual readings <span data-icon="chevron"></span></a></section>
+{% endblock %}

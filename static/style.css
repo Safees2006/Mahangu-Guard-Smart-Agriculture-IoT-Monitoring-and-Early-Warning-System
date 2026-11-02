@@ -81,3 +81,65 @@ kbd { background: transparent; }
   .history-actions .button, .text-button { font-size: 9px; }
   .mobile-nav a { font-size: 9px; font-weight: 650; }
 }
+
+/* Dedicated workspace pages share the same shell and live sample state. */
+.page-description { max-width: 680px; color: #87918b; font-size: 12px; line-height: 1.7; margin: 0; }
+.page-status { display: flex; align-items: center; flex-wrap: wrap; gap: 13px 27px; padding: 16px 20px; margin-bottom: 22px; }
+.page-status > span { color: #87918b; font-size: 11px; }
+.page-status strong { color: #365743; font-size: 11px; font-weight: 650; margin-left: 5px; }
+.page-status .status-badge { margin-right: auto; font-size: 10px; }
+.sensor-page-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sensor-page-grid .metric { min-height: 145px; padding: 21px; }
+.sensor-page-grid .metric-bottom { margin-top: 16px; }
+.page-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+.information-card { padding: 24px; }
+.information-card h2 { font-size: 14px; margin-bottom: 16px; }
+.information-card p { color: #7b8a80; font-size: 12px; line-height: 1.9; margin: 0 0 12px; }
+.information-card p:last-child { margin-bottom: 0; }
+.page-note { margin-top: 22px; }
+.page-text-link { display: inline-flex; align-items: center; gap: 8px; color: var(--green); font-size: 11px; font-weight: 650; }
+.page-text-link .icon { width: 13px; height: 13px; font-size: 13px; }
+.system-facts { margin: 0; }
+.system-facts > div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.system-facts > div:first-child { padding-top: 0; }
+.system-facts > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.system-facts dt { font-size: 10px; color: #87918b; font-weight: 500; margin-bottom: 5px; }
+.system-facts dd { color: #365743; font-size: 12px; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+.workspace-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.workspace-facts > div, .workspace-facts > div:first-child, .workspace-facts > div:last-child { border: 0; padding: 0; }
+.page-chart .chart-wrap { height: 330px; }
+.page-chart .chart-foot { padding-bottom: 20px; }
+.page-warnings #alerts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 180px; align-content: start; padding-block: 10px; }
+.page-warnings .empty-alert { grid-column: 1 / -1; }
+.page-warnings .alert-item { padding: 24px; }
+.page-warnings .alert-item h3 { font-size: 14px; }
+.page-warnings .alert-item p { font-size: 11px; }
+.rules-table { width: 100%; min-width: 570px; }
+.rules-table th, .rules-table td { padding: 14px 12px; font-size: 11px; white-space: normal; }
+.rules-table th { color: #7b8a80; }
+.rules-table td { color: #486353; }
+.page-history .table-scroll { max-height: 650px; }
+.page-history .table-scroll table { min-width: 760px; }
+.page-footnote { font-size: 10px; color: #87918b; line-height: 1.8; margin: 14px 3px 0; }
+body[data-page='system'] .system-panel { margin-top: 22px; }
+.mobile-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 960px) {
+  .sensor-page-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .page-description { font-size: 11px; }
+  .page-status { padding: 14px; gap: 11px 16px; margin-bottom: 16px; }
+  .page-status > span, .page-status strong { font-size: 10px; }
+  .page-status .status-badge { margin-right: 0; }
+  .sensor-page-grid .metric { min-height: 128px; padding: 16px 13px; }
+  .page-detail-grid { grid-template-columns: 1fr; gap: 15px; margin-top: 16px; }
+  .information-card { padding: 20px 17px; }
+  .information-card p { font-size: 11px; }
+  .page-chart .chart-wrap { height: 245px; }
+  .page-warnings #alerts { grid-template-columns: 1fr; }
+  .page-warnings .alert-item { padding: 20px; }
+  .page-note { margin-top: 16px; }
+  .mobile-nav { padding-inline: 5px; }
+  .mobile-nav a { font-size: 8px; gap: 6px; min-width: 0; }
+}

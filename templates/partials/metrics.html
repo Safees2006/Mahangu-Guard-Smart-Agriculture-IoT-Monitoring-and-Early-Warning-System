@@ -1,0 +1,9 @@
+<div class="metrics{% if page == 'sensors' %} sensor-page-grid{% endif %}">
+{% if page == 'sensors' %}
+<article class="panel metric"><div class="metric-top"><span class="round-icon amber" data-icon="temperature"></span><span>Temperature</span></div><div class="metric-bottom"><div class="metric-value"><span id="temperature-value">—</span><small>°C</small></div><span class="metric-hint">Ambient<br><strong>temperature</strong></span></div></article>
+{% endif %}
+          <article class="panel metric"><div class="metric-top"><span class="round-icon green" data-icon="drop"></span><span>Soil moisture</span></div><div class="metric-bottom"><div class="metric-value"><span id="moisture-value">—</span><small>%</small></div><span class="metric-hint">Demo band<br><strong>30–85%</strong></span></div><div class="meter"><span id="moisture-meter"></span></div></article>
+          <article class="panel metric"><div class="metric-top"><span class="round-icon purple" data-icon="ph"></span><span>Soil pH</span></div><div class="metric-bottom"><div class="metric-value"><span id="ph-value">—</span><small>pH</small></div><span class="metric-hint">Demo band<br><strong>5.5–7.5</strong></span></div></article>
+          <article class="panel metric"><div class="metric-top"><span class="round-icon blue" data-icon="sun"></span><span>Light level</span></div><div class="metric-bottom"><div class="metric-value"><span id="light-value">—</span><small>%</small></div><span class="metric-hint">Relative<br><strong>intensity</strong></span></div></article>
+          <article class="panel metric"><div class="metric-top"><span class="round-icon amber" data-icon="wave"></span><span>Alkalinity</span></div><div class="metric-bottom"><div class="metric-value"><span id="alkalinity-value">—</span><small>mg/L</small></div><span class="metric-hint">Synthetic<br><strong>as CaCO₃</strong></span></div></article>
+        </div>

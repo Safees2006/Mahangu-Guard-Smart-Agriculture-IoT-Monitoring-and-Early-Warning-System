@@ -24,6 +24,14 @@ FIELDS = {
 SOURCES = {"local_demo", "mqtt_demo", "wokwi_simulation", "physical_device"}
 DEMO_RULES = {"dry_below": 30, "wet_above": 85, "hot_above": 38,
               "ph_below": 5.5, "ph_above": 7.5, "alkalinity_above": 200}
+PAGES = {
+    "dashboard": {"endpoint": "index", "title": "Dashboard", "mobile_title": "Overview", "icon": "grid", "description": "Your field at a glance: latest conditions, trends and warnings."},
+    "sensors": {"endpoint": "sensors", "title": "Soil & sensors", "mobile_title": "Sensors", "icon": "drop", "description": "Inspect the latest recorded sensor values, units and demonstration limits."},
+    "trends": {"endpoint": "trends", "title": "Sensor trends", "mobile_title": "Trends", "icon": "chart", "description": "Compare recent readings by measurement and sample time."},
+    "warnings": {"endpoint": "warnings", "title": "Early warnings", "mobile_title": "Warnings", "icon": "bell", "description": "Review warnings from the latest stored sample before checking field conditions."},
+    "history": {"endpoint": "reading_history", "title": "Reading history", "mobile_title": "History", "icon": "clock", "description": "Search recent samples, trace their source and export stored readings."},
+    "system": {"endpoint": "system_information", "title": "System information", "mobile_title": "System", "icon": "settings", "description": "Understand this workspace, its data path and the limits of the prototype."},
+}
 
 
 def utcnow():
@@ -143,9 +151,38 @@ def create_app(test_config=None):
         response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
         return response
 
+    def dashboard_page(page):
+        return render_template(
+            "index.html" if page == "dashboard" else f"pages/{page}.html",
+            page=page, page_info=PAGES[page], navigation=PAGES,
+            device_id=app.config["DEVICE_ID"], mqtt_mode=app.config["MQTT_MODE"],
+            project_name=PROJECT_NAME, demo_rules=DEMO_RULES,
+            stale_seconds=app.config["STALE_SECONDS"], search_query=request.args.get("q", ""),
+        )
+
     @app.get("/")
     def index():
-        return render_template("index.html", device_id=app.config["DEVICE_ID"], mqtt_mode=app.config["MQTT_MODE"], project_name=PROJECT_NAME)
+        return dashboard_page("dashboard")
+
+    @app.get("/sensors")
+    def sensors():
+        return dashboard_page("sensors")
+
+    @app.get("/trends")
+    def trends():
+        return dashboard_page("trends")
+
+    @app.get("/warnings")
+    def warnings():
+        return dashboard_page("warnings")
+
+    @app.get("/history")
+    def reading_history():
+        return dashboard_page("history")
+
+    @app.get("/system")
+    def system_information():
+        return dashboard_page("system")
 
     @app.get("/api/health")
     def health():

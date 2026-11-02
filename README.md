@@ -75,6 +75,21 @@ For manual scenarios, start `app.py` without `--demo`, then run `feeder.py --sce
 - Measurement selector, 10/30/60-sample chart windows, searchable/expanded history and CSV export.
 - Validated timestamped input, duplicate rejection and persistent SQLite history.
 
+## Workspace pages
+
+Every sidebar and mobile navigation item opens its own page. The same MQTT/HTTP readings and sample freshness are available across the workspace.
+
+| Page | URL path | Contents |
+| --- | --- | --- |
+| Dashboard | `/` | Field overview and monitoring summaries |
+| Soil & sensors | `/sensors` | Five sensor values, units and device context |
+| Sensor trends | `/trends` | Measurement selector and recent-sample chart |
+| Early warnings | `/warnings` | Latest sample warnings and demonstration rules |
+| Reading history | `/history` | Searchable recent readings and CSV export |
+| System information | `/system` | Device configuration, data path and prototype limits |
+
+Open these paths on the running dashboard, for example `http://127.0.0.1:5050/sensors`. The top search form opens `/history?q=...`. Direct URLs, page reload and browser Back work with normal page navigation.
+
 The gauge counts four configured checks; it is not an agronomic health score. Light is a relative percentage, and alkalinity is a synthetic mg/L-as-CaCO3 proxy. The demonstration thresholds require agricultural review. Live weather, physical calibration and automated irrigation are not implemented.
 
 ## API

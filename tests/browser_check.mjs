@@ -85,10 +85,60 @@ try {
   await evaluate('refresh()');
   const offline = await evaluate("({state: document.getElementById('connection').textContent, moisture: document.getElementById('moisture-value').textContent})");
   assert(offline.state === 'Disconnected' && offline.moisture === '18', 'Disconnected state did not preserve previous values.');
+  await command('Network.emulateNetworkConditions', {offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
+  // Follow real links, rather than changing classes or scrolling to sections.
+  const pages = [
+    {page: 'dashboard', path: '/'}, {page: 'sensors', path: '/sensors'},
+    {page: 'trends', path: '/trends'}, {page: 'warnings', path: '/warnings'},
+    {page: 'history', path: '/history'}, {page: 'system', path: '/system'}
+  ];
+  const waitForPage = async (page, previousOrigin = null) => {
+    for (let attempt = 0; attempt < 100; attempt++) {
+      try {
+        if (await evaluate(`document.body?.dataset.page === ${JSON.stringify(page)} && performance.timeOrigin !== ${JSON.stringify(previousOrigin)} && typeof latestOverview !== 'undefined' && latestOverview?.latest !== null && latestOverview?.latest !== undefined`)) return;
+      } catch { /* navigation replaces the JavaScript execution context */ }
+      await delay(100);
+    }
+    throw new Error(`Page did not render its live sample: ${page}`);
+  };
+  const navigation = {};
+  for (const viewport of [{name: 'desktop', width: 1440, height: 1100, mobile: false}, {name: 'mobile', width: 390, height: 844, mobile: true}]) {
+    await command('Emulation.setDeviceMetricsOverride', {width: viewport.width, height: viewport.height, mobile: viewport.mobile, deviceScaleFactor: 1});
+    navigation[viewport.name] = [];
+    for (const page of pages) {
+      const selector = viewport.mobile ? '.mobile-nav' : '.sidebar';
+      const previousOrigin = await evaluate('performance.timeOrigin');
+      await evaluate(`document.querySelector(${JSON.stringify(selector + ' a[href="' + page.path + '"]')}).click()`);
+      await waitForPage(page.page, previousOrigin);
+      const state = await evaluate(`({path: location.pathname, active: document.querySelector(${JSON.stringify(selector + ' a[aria-current="page"]')})?.pathname, heading: document.querySelector('h1')?.textContent, overflow: document.documentElement.scrollWidth > innerWidth, source: document.getElementById('source-note').textContent})`);
+      assert(state.path === page.path && state.active === page.path, `Navigation did not open the correct ${viewport.name} page: ${page.path}`);
+      assert(!state.overflow, `${page.path} overflows the ${viewport.name} viewport.`);
+      assert(state.source.includes('synthetic'), `${page.path} lost the data-source label.`);
+      if (page.page === 'sensors') assert((await evaluate("document.getElementById('temperature-value').textContent")) === '42', 'Sensor page lost the temperature value.');
+      if (page.page === 'warnings') assert((await evaluate("document.getElementById('alerts').textContent")).includes('High temperature'), 'Warnings page lost the current alerts.');
+      if (page.page === 'history') assert((await evaluate("document.querySelectorAll('#history-body tr').length")) === Math.min(redesign.samples, 60), 'History page did not show the fetched sample window.');
+      if (!viewport.mobile && page.page !== 'dashboard') {
+        const shot = await command('Page.captureScreenshot', {format: 'png', captureBeyondViewport: true});
+        await fs.writeFile(path.join(outputDirectory, `${imagePrefix}_${page.page}_desktop.png`), Buffer.from(shot.data, 'base64'));
+      }
+      navigation[viewport.name].push({page: page.page, path: state.path, result: 'passed'});
+    }
+  }
+  const reloadOrigin = await evaluate('performance.timeOrigin');
+  await command('Page.reload');
+  await waitForPage('system', reloadOrigin);
+  const entries = await command('Page.getNavigationHistory');
+  await command('Page.navigateToHistoryEntry', {entryId: entries.entries[entries.currentIndex - 1].id});
+  await waitForPage('history');
+  assert((await evaluate('location.pathname')) === '/history', 'Browser Back did not restore the previous page.');
+  const searchOrigin = await evaluate('performance.timeOrigin');
+  await command('Page.navigate', {url: `${baseURL}/history?q=High%20temperature`});
+  await waitForPage('history', searchOrigin);
+  assert((await evaluate("document.querySelectorAll('#history-body tr').length")) === 1, 'History search URL did not filter the results.');
   // Network errors are expected for this explicit offline experiment.
   const unexpected = errors.filter(error => !/ERR_INTERNET_DISCONNECTED|Failed to load resource|net::ERR/.test(error));
   assert(unexpected.length === 0, `Browser exceptions: ${unexpected.join('; ')}`);
-  console.log(JSON.stringify({desktop, mobile, redesign, history_filter: 'passed', history_expand: 'passed', sample_range: 'passed', chart_selector: 'passed', stale_clock_advance: 'passed (browser clock advanced 30s)', offline_network: offline, unexpected_browser_errors: unexpected}, null, 2));
+  console.log(JSON.stringify({desktop, mobile, redesign, history_filter: 'passed', history_expand: 'passed', sample_range: 'passed', chart_selector: 'passed', stale_clock_advance: 'passed (browser clock advanced 30s)', offline_network: offline, navigation, direct_reload: 'passed', browser_back: 'passed', search_url: 'passed', unexpected_browser_errors: unexpected}, null, 2));
   await command('Browser.close');
 } finally {
   socket?.close();

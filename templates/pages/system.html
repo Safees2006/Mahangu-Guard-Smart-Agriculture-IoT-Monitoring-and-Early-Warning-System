@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel information-card"><h2>Workspace configuration</h2><dl class="system-facts workspace-facts"><div><dt>Registered device</dt><dd>{{ device_id }}</dd></div><div><dt>Transport mode</dt><dd>{{ 'MQTT with a local HTTP bridge' if mqtt_mode else 'Local HTTP ingestion' }}</dd></div><div><dt>Storage</dt><dd>Local SQLite history</dd></div><div><dt>Stale after</dt><dd>{{ stale_seconds }} seconds without a current sample</dd></div></dl></section>
+{% include 'partials/system.html' %}
+<section class="panel information-card page-note"><h2>Simulation and connectivity</h2><p>The dashboard uses a four-second refresh interval. Sample freshness describes the age of the reading; it does not independently confirm the broker connection. The public MQTT demonstration uses untrusted synthetic data.</p><a class="page-text-link" href="https://wokwi.com/projects/479554649720488961" target="_blank" rel="noopener noreferrer">Open the Wokwi simulation <span data-icon="external"></span></a></section>
+{% endblock %}
