@@ -1,0 +1,5 @@
+{
+  "run_at": "2026-11-02T10:32:06.441071+05:30",
+  "status": "failed",
+  "reason": "Public broker subscription not acknowledged within 20 seconds."
+}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "author": "Mahangu Guard starter",
+  "editor": "wokwi",
+  "parts": [
+    {"type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 10, "left": 20, "attrs": {}},
+    {"type": "wokwi-dht22", "id": "dht", "top": 10, "left": 245, "attrs": {"temperature": "30", "humidity": "55"}},
+    {"type": "wokwi-potentiometer", "id": "moisture", "top": 200, "left": -160, "attrs": {"value": "594"}},
+    {"type": "wokwi-potentiometer", "id": "ph", "top": 200, "left": -30, "attrs": {"value": "468"}},
+    {"type": "wokwi-potentiometer", "id": "alk", "top": 200, "left": 100, "attrs": {"value": "112"}},
+    {"type": "wokwi-photoresistor-sensor", "id": "ldr", "top": 200, "left": 270, "attrs": {}},
+    {"type": "wokwi-led", "id": "led", "top": -80, "left": 230, "attrs": {"color": "red"}},
+    {"type": "wokwi-resistor", "id": "res", "top": -25, "left": 175, "attrs": {"value": "220"}},
+    {"type": "wokwi-buzzer", "id": "buzzer", "top": -80, "left": 320, "attrs": {"volume": "0.2"}}
+  ],
+  "connections": [
+    ["esp:3V3", "dht:VCC", "red", []], ["esp:GND.1", "dht:GND", "black", []], ["esp:D15", "dht:SDA", "green", []],
+    ["esp:3V3", "moisture:VCC", "red", []], ["esp:GND.1", "moisture:GND", "black", []], ["esp:D34", "moisture:SIG", "green", []],
+    ["esp:3V3", "ph:VCC", "red", []], ["esp:GND.1", "ph:GND", "black", []], ["esp:D35", "ph:SIG", "green", []],
+    ["esp:3V3", "alk:VCC", "red", []], ["esp:GND.1", "alk:GND", "black", []], ["esp:D32", "alk:SIG", "green", []],
+    ["esp:3V3", "ldr:VCC", "red", []], ["esp:GND.1", "ldr:GND", "black", []], ["esp:D33", "ldr:AO", "green", []],
+    ["esp:D25", "res:1", "green", []], ["res:2", "led:A", "green", []], ["led:C", "esp:GND.1", "black", []],
+    ["esp:D26", "buzzer:2", "green", []], ["buzzer:1", "esp:GND.1", "black", []]
+  ],
+  "dependencies": {}
+}

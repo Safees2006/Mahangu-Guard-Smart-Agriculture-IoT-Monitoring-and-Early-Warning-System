@@ -1,0 +1,12 @@
+.venv/
+.tools/
+__pycache__/
+*.pyc
+instance/
+**/config.h
+.env
+.env.*
+!.env.example
+*.log
+/mahangu_guard_mqtt_*.zip
+/mahangu_guard_mqtt_*/

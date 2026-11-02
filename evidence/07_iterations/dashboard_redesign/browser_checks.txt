@@ -1,0 +1,29 @@
+{
+  "desktop": {
+    "moisture": "18",
+    "state": "Receiving data",
+    "alerts": "!Dry soilInspect the plot and check the moisture reading.!High temperatureCheck field conditions and confirm the temperature.",
+    "source": "Local demo Â· synthetic Â· field accuracy not verified",
+    "rows": 6,
+    "overflow": false
+  },
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "redesign": {
+    "gauge": "2/4",
+    "samples": 16,
+    "title": "Mahangu Guard â€“ Smart Agriculture IoT Monitoring and Early Warning System"
+  },
+  "history_filter": "passed",
+  "history_expand": "passed",
+  "sample_range": "passed",
+  "chart_selector": "passed",
+  "stale_clock_advance": "passed (browser clock advanced 30s)",
+  "offline_network": {
+    "state": "Disconnected",
+    "moisture": "18"
+  },
+  "unexpected_browser_errors": []
+}

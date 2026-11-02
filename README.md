@@ -1,10 +1,14 @@
-# Mahangu Guard
+# Mahangu Guard – Smart Agriculture IoT Monitoring and Early Warning System
 
 A local Unit 45 IoT project for the fictional Mushimba-Shikongo Grain client in Kavango East, Namibia. Flask receives authenticated JSON readings, validates and stores them in SQLite, and serves a responsive monitoring dashboard.
 
+**Wokwi simulation:** [Open the saved Mahangu Guard project](https://wokwi.com/projects/479554649720488961).
+
+**Dashboard preview:** [Desktop](evidence/07_iterations/dashboard_redesign/redesigned_dashboard_desktop.png) · [Mobile](evidence/07_iterations/dashboard_redesign/redesigned_dashboard_mobile.png). These screenshots use a clearly labelled synthetic UI test fixture.
+
 ## Start on this computer
 
-Flask is already available in the current Python environment. From this directory:
+Requires Python 3.10 or later. For a fresh computer, follow the clean-environment commands below. If the dependencies are already installed, run from this directory:
 
 ```powershell
 python app.py --demo
@@ -119,5 +123,9 @@ This first stage follows the three **named** report drafts and supplied PDF. The
 All alert bands are **demonstration values**, pending agricultural review. A live forecast is **not connected**, and the UI says so. Alkalinity and pH are test-generated proxies. There is no automated irrigation, crop-yield prediction or claim of field deployment. This is a local Python application; it has not been published to cloud hosting. The read-only dashboard and export are local and have no user login; add access controls and a production server before remote use.
 
 Next work: verify Wokwi transport, capture screenshots using the evidence guide, obtain consented participant feedback, make documented improvements, and complete the evaluation using actual results.
-#   M a h a n g u - G u a r d - S m a r t - A g r i c u l t u r e - I o T - M o n i t o r i n g - a n d - E a r l y - W a r n i n g - S y s t e m  
- 
+
+## Working together
+
+Each contributor should clone the repository, create their own Python environment, install `requirements.txt`, and work on a separate branch. Open a pull request for review before merging into `main`.
+
+Runtime data and credentials are deliberately excluded from Git: `instance/`, `.venv/`, `.env` and private `config.h` files. Each computer should run `mqtt_setup.py` to generate its local demo configuration. Use the matching generated `wokwi/mqtt/config.h` in Wokwi. A shared Wokwi project and a newly generated laptop topic must match before telemetry can flow; do not assume a new clone shares the original laptop's local settings.

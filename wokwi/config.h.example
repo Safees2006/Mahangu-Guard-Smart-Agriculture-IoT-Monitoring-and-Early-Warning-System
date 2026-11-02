@@ -1,0 +1,6 @@
+#pragma once
+// Copy to config.h locally. config.h is ignored by version control.
+// Private Wokwi gateway required for host.wokwi.internal.
+#define API_URL "http://host.wokwi.internal:5000/api/readings"
+#define DEVICE_TOKEN "REPLACE_WITH_LOCAL_TOKEN_AT_LEAST_24_CHARACTERS"
+#define DEVICE_ID "mahangu-01"
